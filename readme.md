@@ -1,4 +1,4 @@
-# QRCodeAPI Ver 2
+# QRCodeAPI Ver 3
 By Kasper
 
 Username: admin
