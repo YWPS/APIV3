@@ -2,12 +2,13 @@ import json
 
 from django.core import serializers
 from django.http import JsonResponse
+from django.http.response import HttpResponse
 from django.utils.crypto import get_random_string
 from django.contrib.auth.models import User
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth import authenticate
 
-from .models import Product
+from .models import Image, Product
 
 
 @csrf_exempt
@@ -74,76 +75,20 @@ def UpdateProduct(request, hash):
 
 
 @csrf_exempt
-def DeleteProduct(request, hash):
-    Product.objects.get(hash=hash).delete()
-    return JsonResponse({})
-
-
-@csrf_exempt
-def CreateUser(request, username):
+def CreateImage(request, name):
     if request.method == "POST":
+        # decode json
         jsonUnicode = request.body.decode('utf-8')
         jsonData = json.loads(jsonUnicode)
-        password = jsonData["password"]
-        User.objects.create_user(username=username, password=password)
-        return JsonResponse({})
+        # required fields
+        extension = jsonData['extention']
+        Image.objects.update_or_create(name=name, extension=extension)
+        # response
+        return HttpResponse('')
 
 
-def GetUser(request, username):
-    target = User.objects.get(username=username)
-    products = eval(serializers.serialize(
-        'json', Product.objects.filter(user=target)))
-    output = []
-    for item in products:
-        output.append(item["fields"]["name"])
-    return JsonResponse(
-        {
-            "username": target.username,
-            "Products": output
-        }
-    )
-
-
-@csrf_exempt
-def UpdateUsername(request):
-    if request.method == "POST":
-        jsonUnicode = request.body.decode('utf-8')
-        jsonData = json.loads(jsonUnicode)
-        oldusername = jsonData["oldusername"]
-        newusername = jsonData["newusername"]
-        target = User.objects.get(username=oldusername)
-        target.username = newusername
-        target.save()
-        return JsonResponse({})
-
-
-@csrf_exempt
-def UpdatePassword(request):
-    if request.method == "POST":
-        jsonUnicode = request.body.decode('utf-8')
-        jsonData = json.loads(jsonUnicode)
-        username = jsonData["username"]
-        newpassword = jsonData["newpassword"]
-        target = User.objects.get(username=username)
-        target.set_password(newpassword)
-        return JsonResponse({})
-
-
-def DeleteUser(request, username):
-    User.objects.delete(username=username)
-    return JsonResponse({})
-
-
-@csrf_exempt
-def AuthUser(request, username):
-    if request.method == "POST":
-        jsonUnicode = request.body.decode('utf-8')
-        jsonData = json.loads(jsonUnicode)
-        password = jsonData["password"]
-        if authenticate(username=username, password=password) is None:
-            return JsonResponse({
-                "fail": True
-            })
-        return JsonResponse({
-            "fail": False
-        })
+def GetImage(request, name):
+    target = Image.objects.get(name=name)
+    return JsonResponse({
+        'extension': f'{target.name}'
+    })
