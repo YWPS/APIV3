@@ -22,6 +22,5 @@ class Image(models.Model):
     name = models.CharField(max_length=256)
     extension = models.CharField(max_length=64)
 
-
-def __str__(self):
-    return f"{self.name}.{self.extension}"
+    def __str__(self):
+        return f"{self.name}.{self.extension}"

@@ -54,41 +54,20 @@ def GetProduct(request, hash):
 
 
 @csrf_exempt
-def UpdateProduct(request, hash):
-    if request.method == "POST":
-        # decode json
-        jsonUnicode = request.body.decode('utf-8')
-        jsonData = json.loads(jsonUnicode)
-        # required fields
-        name = jsonData["name"]
-        code = str(jsonData["code"])
-        username = jsonData["username"]
-        # authenticate user
-        user = User.objects.get(username=username)
-        # update or create model
-        Product.objects.update_or_create(
-            name=name, code=code, user=user,  hash=hash)
-        # response
-        return JsonResponse({
-            "url": f"https://api.qrserver.com/v1/create-qr-code/?data={hash};size=1024*1024"
-        })
-
-
-@csrf_exempt
 def CreateImage(request, name):
     if request.method == "POST":
         # decode json
         jsonUnicode = request.body.decode('utf-8')
         jsonData = json.loads(jsonUnicode)
         # required fields
-        extension = jsonData['extention']
+        extension = jsonData['extension']
         Image.objects.update_or_create(name=name, extension=extension)
         # response
-        return HttpResponse('')
+        return HttpResponse('', status=200)
 
 
 def GetImage(request, name):
     target = Image.objects.get(name=name)
     return JsonResponse({
-        'extension': f'{target.name}'
+        'extension': f'{target.extension}'
     })
